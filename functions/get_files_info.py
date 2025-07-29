@@ -8,19 +8,22 @@ def get_files_info(working_directory, directory=None):
     abs_working = os.path.abspath(working_directory)
     abs_joined = os.path.abspath(joined_path)
     if not abs_joined.startswith(abs_working):
-        return(f'Error: Cannot list "{directory}" as it is outside the permitted working directory')
+        return {"error": f'Error: Cannot list "{directory}" as it is outside the permitted working directory'}
     if not os.path.isdir(abs_joined):
-        return(f'Error: "{directory}" is not a directory')
+        return {"error": f'Error: "{directory}" is not a directory'}
     info = []
+    print(f"abs_working={abs_working}, abs_joined={abs_joined}")
+    print(f"Checking isdir: {os.path.isdir(abs_joined)}")
     try:
         for item in os.listdir(abs_joined):
             full_item_path = os.path.join(abs_joined, item)
             size = os.path.getsize(full_item_path)
             string_item = (f" - {item}: file_size={size} bytes, is_dir={os.path.isdir(full_item_path)}")
             info.append(string_item)
-        return("\n".join(info))
+        product = "\n".join(info)
+        return {"content": product}
     except Exception:
-        return(f"Error: could not list contents the directory. try again")
+        return {"error": f"Error: could not list contents the directory. try again"}
 
 schema_get_files_info = types.FunctionDeclaration(
     name="get_files_info",

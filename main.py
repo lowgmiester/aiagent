@@ -28,7 +28,7 @@ def main():
     system_prompt = """
     You are a helpful AI coding agent.
 
-    When a user asks a question or makes a request, make a function call plan. You can perform the following operations:
+    When a user asks a question or makes a request, make a function call plan, and execute that plan using the functions you have access to. You can perform the following operations:
 
     - List files and directories
     - Read file contents
@@ -48,7 +48,8 @@ def main():
             )
         )
         for can in response.candidates:
-            messages.append(can.content)
+            if can.content.parts:
+                messages.append(can.content)
         return response
 
     messages = [
@@ -66,10 +67,10 @@ def main():
                 print("DEBUG: response.function_calls =", getattr(response, "function_calls", None))
                 for idx, can in enumerate(getattr(response, "candidates", [])):
                     print(f"DEBUG: candidate[{idx}] function_call =", getattr(can, "function_call", None))
+                if not response.text and not response.function_calls:
+                    raise Exception("Error: no valid response")
                 if response.text:
                     print(response.text)
-                    break
-
                 while response.function_calls:
                     for function_call_part in response.function_calls:
                         print(f" - Calling function: {function_call_part.name}")
